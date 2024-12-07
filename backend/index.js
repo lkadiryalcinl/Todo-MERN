@@ -5,6 +5,7 @@ const morgan=require("morgan")
 const cookieParser=require("cookie-parser")
 const authRoutes=require("./routes/Auth")
 const userRoutes=require("./routes/User")
+const todoRoutes=require("./routes/Todo")
 const { connectToDB } = require("./database/db")
 
 
@@ -29,6 +30,7 @@ server.options('*', cors({
 // routeMiddleware
 server.use("/auth",authRoutes)
 server.use("/users",userRoutes)
+server.use("/todo",todoRoutes)
 
 server.get("/",(req,res)=>{
     res.status(200).json({message:'running'})
