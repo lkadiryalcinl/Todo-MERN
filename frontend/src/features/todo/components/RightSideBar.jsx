@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutAsync, selectLoggedInUser } from '../../auth/AuthSlice.jsx';
+import {
+  deleteAllTodos,
+} from '../TodoSlice';
 import { useNavigate } from 'react-router-dom';
-import WarningModal from './WarningModal'; // Import the modal component
+import WarningModal from './WarningModal';
 
 const RightSideBar = () => {
   const dispatch = useDispatch();
@@ -35,7 +38,7 @@ const RightSideBar = () => {
     if (modalState.action === 'logout') {
       dispatch(logoutAsync());
     } else if (modalState.action === 'delete') {
-      console.log('All tasks deleted'); // Replace with your delete logic
+      dispatch(deleteAllTodos())
     }
     setModalState({ isOpen: false, action: null });
   };

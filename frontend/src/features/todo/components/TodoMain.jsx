@@ -1,65 +1,84 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import React,{useState} from 'react'
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    fetchTodos,
+    updateTodo,
+    deleteTodo,
+    selectTodos,
+    selectSelectedTodo,
+    clearError,
+    resetStatus,
+    selectTodoError,
+    selectTodoStatus,
+    setSelectedTodo
+} from '../TodoSlice';
+
 import LeftSideBar from './LeftSideBar';
 import RightSideBar from './RightSideBar';
 import TaskCard from './TaskCard';
 import TaskModal from './TaskModal';
 import WarningModal from './WarningModal';
 
-
-const mockTasks = [
-    { id: 1, title: 'Complete React Project', description: 'Finish the React project with all required features.', completed: false, favorited: true, date: '2024-12-03' },
-    { id: 2, title: 'Buy Groceries', description: 'Milk, bread, eggs, and fruits.', completed: true, favorited: false, date: '2024-12-02' },
-    { id: 3, title: 'Learn JavaScript', description: 'Study ES6 and asynchronous JavaScript techniques.', completed: false, favorited: false, date: '2024-12-01' },
-    { id: 4, title: 'Exercise', description: 'Go for a 30-minute run in the park.', completed: false, favorited: true, date: '2024-12-03' },
-    { id: 5, title: 'Read a Book', description: 'Read 20 pages of a book on algorithms.', completed: true, favorited: true, date: '2024-11-30' },
-    { id: 6, title: 'Fix Bug in API', description: 'Resolve the issue causing 500 errors in the login API.', completed: false, favorited: false, date: '2024-12-01' },
-    { id: 7, title: 'Write Documentation', description: 'Update the README for the project with setup instructions.', completed: true, favorited: false, date: '2024-11-29' },
-    { id: 8, title: 'Attend Meeting', description: 'Join the team sync meeting at 2 PM.', completed: false, favorited: true, date: '2024-12-03' },
-    { id: 9, title: 'Clean the House', description: 'Vacuum the living room and clean the kitchen.', completed: true, favorited: false, date: '2024-12-01' },
-    { id: 10, title: 'Prepare Presentation', description: 'Prepare slides for the upcoming client presentation.', completed: false, favorited: false, date: '2024-12-03' },
-    { id: 11, title: 'Watch Tutorial', description: 'Watch a tutorial on React Hooks.', completed: true, favorited: true, date: '2024-11-28' },
-    { id: 12, title: 'Submit Report', description: 'Submit the weekly progress report to the manager.', completed: false, favorited: false, date: '2024-12-02' },
-    { id: 13, title: 'Plan Vacation', description: 'Research vacation destinations and book flights.', completed: false, favorited: true, date: '2024-12-01' },
-    { id: 14, title: 'Call Mom', description: 'Catch up with mom for 30 minutes.', completed: true, favorited: false, date: '2024-11-30' },
-    { id: 15, title: 'Organize Files', description: 'Sort and organize the project files on the computer.', completed: false, favorited: false, date: '2024-12-03' },
-];
-
 const TodoMain = () => {
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
-    const [taskToEdit, setTaskToEdit] = useState(null);
-    const [taskToDelete, setTaskToDelete] = useState(null);
 
-    const handleEditTask = (task) => {
-        setTaskToEdit(task);
-        setIsTaskModalOpen(true);
+    const dispatch = useDispatch();
+    const todos = useSelector(selectTodos);
+    const selectedTodo = useSelector(selectSelectedTodo);
+    const status = useSelector(selectTodoStatus);
+    const error = useSelector(selectTodoError);
+
+    useEffect(() => {
+        dispatch(fetchTodos());
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (error) {
+            dispatch(clearError());
+        }
+    }, [error, dispatch]);
+
+    useEffect(() => {
+        if (status === 'fulfilled') {
+            dispatch(resetStatus());
+        }
+    }, [status, dispatch]);
+
+    const handleEditTask = (updatedTask) => {
+        if (!updatedTask || !updatedTask._id) {
+            return;
+        }
+        dispatch(updateTodo({
+            id: updatedTask._id,
+            content: { ...updatedTask }, 
+        }));
+        clearModal();
     };
 
     const handleDeleteTask = (task) => {
-        setTaskToDelete(task);
-        setIsWarningModalOpen(true);
+        dispatch(deleteTodo(task._id));
+        clearModal();
     };
 
-    const handleWarningModalConfirm = () => {
-        // Add delete task logic here
-        console.log(`Task with ID ${taskToDelete.id} deleted`);
-        setIsWarningModalOpen(false);
-        setTaskToDelete(null);
-    };
+    const setTaskModal = (task) => {
+        dispatch(setSelectedTodo(task))
+        setIsTaskModalOpen(true)
+    }
 
-    const handleTaskModalSubmit = (updatedTask) => {
-        // Add update task logic here
-        console.log(`Task with ID ${updatedTask.id} updated`);
-        setIsTaskModalOpen(false);
-        setTaskToEdit(null);
-    };
+    const setWarningModal = (task) => {
+        dispatch(setSelectedTodo(task))
+        setIsWarningModalOpen(true)
+    }
 
-    const handleCloseModals = () => {
-        setIsTaskModalOpen(false);
-        setIsWarningModalOpen(false);
-    };
+    const clearModal = () => {
+        dispatch(clearError())
+        dispatch(setSelectedTodo(null))
+        setIsTaskModalOpen(false)
+        setIsWarningModalOpen(false)
+    }
 
     return (
         <div className="container-fluid mt-2">
@@ -72,7 +91,13 @@ const TodoMain = () => {
                         <div className="row mb-3">
                             <div className="col-4">
                                 <div className="input-group">
-                                    <input className="form-control" style={{ boxShadow: 'none' }} type="search" placeholder="Search Todo" aria-label="Search" />
+                                    <input
+                                        className="form-control"
+                                        style={{ boxShadow: 'none' }}
+                                        type="search"
+                                        placeholder="Search Todo"
+                                        aria-label="Search"
+                                    />
                                     <span className="input-group-text">
                                         <i className="bi bi-search"></i>
                                     </span>
@@ -80,13 +105,13 @@ const TodoMain = () => {
                             </div>
                         </div>
 
-                        <div className="row overflow-auto" style={{ height: 'calc(100vh - 65px)' }}>
-                            {mockTasks.map((task) => (
+                        <div className="row overflow-auto">
+                            {todos.map((task, index) => (
                                 <TaskCard
-                                    key={task.id}
+                                    key={task._id || index} 
                                     task={task}
-                                    onEdit={() => handleEditTask(task)}
-                                    onDelete={() => handleDeleteTask(task)}
+                                    onEdit={() => setTaskModal(task)}
+                                    onDelete={() => setWarningModal(task)}
                                 />
                             ))}
                         </div>
@@ -99,17 +124,17 @@ const TodoMain = () => {
 
             <TaskModal
                 isOpen={isTaskModalOpen}
-                onClose={handleCloseModals}
-                onSubmit={handleTaskModalSubmit}
-                taskData={taskToEdit}
+                onClose={() => clearModal()}
+                onSubmit={(updatedTask) => handleEditTask(updatedTask)}
+                taskData={selectedTodo}
             />
 
             <WarningModal
                 title="Confirm Delete"
-                body={`Are you sure you want to delete the task: "${taskToDelete?.title}"?`}
+                body={`Are you sure you want to delete the task: "${selectedTodo?.title}"?`}
                 isOpen={isWarningModalOpen}
-                onConfirm={handleWarningModalConfirm}
-                onCancel={handleCloseModals}
+                onConfirm={() => handleDeleteTask(selectedTodo)}
+                onCancel={() => clearModal()}
                 confirmText="Delete"
                 cancelText="Cancel"
             />

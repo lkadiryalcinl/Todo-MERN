@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import TaskModal from './TaskModal';
+import { useDispatch } from 'react-redux';
+import { createTodo } from '../TodoSlice';
 
 const LeftSideBar = () => {
     const [modalState, setModalState] = useState({ isOpen: false, taskData: null });
+    const dispatch = useDispatch();
 
     const openCreateModal = () => {
         setModalState({ isOpen: true, taskData: null });
@@ -16,7 +19,7 @@ const LeftSideBar = () => {
         if (modalState.taskData) {
             console.log('Updating task:', task); 
         } else {
-            console.log('Creating task:', task); 
+            dispatch(createTodo(task));
         }
     };
 

@@ -3,12 +3,14 @@ const Todo = require("../models/Todo");
 // Create a new Todo
 exports.createTodo = async (req, res) => {
   try {
-    const { title, description, date, user } = req.body;
+    const { title, description, date } = req.body;
+    const user = req.user;
+    
     const newTodo = new Todo({
       title,
       description,
       date,
-      user, 
+      user,
     });
 
     const savedTodo = await newTodo.save();
@@ -47,7 +49,7 @@ exports.updateTodo = async (req, res) => {
     const updatedTodo = await Todo.findByIdAndUpdate(
       id,
       { title, description, date, isFavorited, isCompleted },
-      { new: true, runValidators: true } 
+      { new: true, runValidators: true }
     );
 
     if (!updatedTodo) return res.status(404).json({ message: "Todo not found" });
@@ -68,5 +70,19 @@ exports.deleteTodo = async (req, res) => {
     res.status(200).json({ message: "Todo deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete todo", details: error.message });
+  }
+};
+
+exports.deleteAllTodos = async (req, res) => {
+  try {
+    const result = await Todo.deleteMany({});
+    console.log(result)
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "No todos found to delete" });
+    }
+
+    res.status(200).json({ message: "All todos deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete todos", details: error.message });
   }
 };

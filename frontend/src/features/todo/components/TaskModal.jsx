@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 const TaskModal = ({ isOpen, onClose, onSubmit, taskData }) => {
-    const [task, setTask] = useState({ title: '', description: '' });
+    const [task, setTask] = useState({ title: '', description: '', date: '' });
 
     useEffect(() => {
-        if (taskData) {
-            setTask(taskData);
-        } else {
-            setTask({ title: '', description: '' });
-        }
+        setTask(taskData || { title: '', description: '', date: '' });
     }, [taskData]);
 
     const handleChange = (e) => {
@@ -54,6 +50,17 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskData }) => {
                                 onChange={handleChange}
                                 placeholder="Enter task description"
                             ></textarea>
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="taskDate" className="form-label">Date</label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                id="taskDate"
+                                name="date"
+                                value={task.date}
+                                onChange={handleChange}
+                            />
                         </div>
                     </div>
                     <div className="modal-footer">

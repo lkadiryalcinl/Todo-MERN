@@ -12,17 +12,17 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
                         <p className="card-text">{task.description}</p>
                         <span>{date.toLocaleDateString()}</span>
                     </div>
-                    <div className="d-flex justify-content-between align-items-center mt-2">
-                        <div className="d-flex gap-2">
-                            {task.completed ? (
+                    <div className="d-flex justify-content-between align-items-center mt-2 flex-wrap">
+                        <div className="d-flex gap-2 col-xl-6 col-md-12 mb-2">
+                            {task.isCompleted ? (
                                 <a href="#" className="btn btn-success">Completed</a>
                             ) : (
                                 <a href="#" className="btn btn-danger">Incomplete</a>
                             )}
                         </div>
-                        <div className="d-flex gap-2">
+                        <div className="d-flex gap-2 col-xl-6 col-md-12">
                             <a href="#" className="btn btn-outline-warning">
-                                <i className={`bi ${task.favorited ? 'bi-star-fill' : 'bi-star'}`}></i>
+                                <i className={`bi ${task.isFavorited ? 'bi-star-fill' : 'bi-star'}`}></i>
                             </a>
                             <a href="#" className="btn btn-outline-danger" onClick={onDelete}>
                                 <i className="bi bi-trash"></i>
