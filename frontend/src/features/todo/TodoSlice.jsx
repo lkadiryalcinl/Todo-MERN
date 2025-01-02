@@ -1,15 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getalltodos, gettodobyid, createtodo, updatetodo, deletetodo,deletealltodos } from './TodoApi';
 
-// Initial State
 const initialState = {
-    todos: [],
+    todos: [],          
+    filteredTodos: [],  
     selectedTodo: null,
-    status: 'idle', // 'idle' | 'pending' | 'fulfilled' | 'rejected'
+    status: 'idle',
     error: null,
+    filter: 'All', 
+    searchTerm: ''
 };
 
-// Async Thunks
 export const fetchTodos = createAsyncThunk('todo/fetchTodos', async () => {
     const response = await getalltodos();
     return response;
@@ -54,6 +55,31 @@ const todoSlice = createSlice({
         setSelectedTodo: (state, action) => {
             state.selectedTodo = action.payload;
         },
+        setFilter: (state, action) => {
+            state.filter = action.payload; 
+            switch (action.payload) {
+                case 'Today':
+                    state.filteredTodos = state.todos.filter(
+                        (todo) => new Date(todo.date).toDateString() === new Date().toDateString()
+                    );
+                    break;
+                case 'Important':
+                    state.filteredTodos = state.todos.filter((todo) => todo.isImportant);
+                    break;
+                case 'Completed':
+                    state.filteredTodos = state.todos.filter((todo) => todo.isCompleted);
+                    break;
+                case 'Uncompleted':
+                    state.filteredTodos = state.todos.filter((todo) => !todo.isCompleted);
+                    break;
+                default: 
+                    state.filteredTodos = state.todos;
+                    break;
+            }
+        },
+        setSearchTerm(state, action) {
+            state.searchTerm = action.payload; 
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -64,6 +90,7 @@ const todoSlice = createSlice({
             .addCase(fetchTodos.fulfilled, (state, action) => {
                 state.status = 'fulfilled';
                 state.todos = action.payload;
+                state.filteredTodos = action.payload;
             })
             .addCase(fetchTodos.rejected, (state, action) => {
                 state.status = 'rejected';
@@ -143,8 +170,27 @@ const todoSlice = createSlice({
 
 export const selectTodos = (state) => state.TodoSlice.todos;
 export const selectSelectedTodo = (state) => state.TodoSlice.selectedTodo;
+export const selectFilteredTodos = (state) => {
+    const { todos, filter, searchTerm } = state.TodoSlice;
+    let filteredTodos = todos;
+
+    if (filter === 'Completed') {
+        filteredTodos = todos.filter((todo) => todo.completed);
+    } else if (filter === 'Uncompleted') {
+        filteredTodos = todos.filter((todo) => !todo.completed);
+    }
+
+    if (searchTerm) {
+        filteredTodos = filteredTodos.filter((todo) =>
+            todo.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    return filteredTodos;
+};
+
 export const selectTodoStatus = (state) => state.TodoSlice.status;
 export const selectTodoError = (state) => state.TodoSlice.error;
 
-export const { clearError, resetStatus, setSelectedTodo } = todoSlice.actions;
+export const { clearError, resetStatus, setSelectedTodo, setFilter, setSearchTerm  } = todoSlice.actions;
 export default todoSlice.reducer;

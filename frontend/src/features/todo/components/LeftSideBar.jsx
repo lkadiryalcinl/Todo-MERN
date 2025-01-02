@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import TaskModal from './TaskModal';
-import { useDispatch } from 'react-redux';
-import { createTodo } from '../TodoSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { createTodo, setFilter } from '../TodoSlice';
 
 const LeftSideBar = () => {
     const [modalState, setModalState] = useState({ isOpen: false, taskData: null });
     const dispatch = useDispatch();
+
+    const activeFilter = useSelector((state) => state.TodoSlice.filter);
 
     const openCreateModal = () => {
         setModalState({ isOpen: true, taskData: null });
@@ -16,11 +18,11 @@ const LeftSideBar = () => {
     };
 
     const handleTaskSubmit = (task) => {
-        if (modalState.taskData) {
-            console.log('Updating task:', task); 
-        } else {
             dispatch(createTodo(task));
-        }
+    };
+
+    const handleFilterChange = (filter) => {
+        dispatch(setFilter(filter));
     };
 
     return (
@@ -36,15 +38,22 @@ const LeftSideBar = () => {
             <div className="mt-4">
                 <hr className="border-top border-secondary" />
             </div>
+
             <div className="d-block">
                 <h5 className="text-center">Todos</h5>
                 <div className="d-flex justify-content-center align-items-center">
-                    <div className="btn-group-vertical row w-100" role="group" aria-label="Basic example">
-                        <a href="#" className="btn btn-secondary">Today</a>
-                        <a href="#" className="btn btn-secondary active">All</a>
-                        <a href="#" className="btn btn-secondary">Important</a>
-                        <a href="#" className="btn btn-secondary">Completed</a>
-                        <a href="#" className="btn btn-secondary">Uncompleted</a>
+                    <div className="btn-group-vertical row w-100" role="group" aria-label="Filter Todos">
+                        {['Today', 'All', 'Important', 'Completed', 'Uncompleted'].map((filter) => (
+                            <button
+                                key={filter}
+                                className={`btn btn-secondary ${
+                                    activeFilter === filter ? 'active' : ''
+                                }`}
+                                onClick={() => handleFilterChange(filter)}
+                            >
+                                {filter}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>

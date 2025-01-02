@@ -6,13 +6,14 @@ import {
     fetchTodos,
     updateTodo,
     deleteTodo,
-    selectTodos,
+    selectFilteredTodos,
     selectSelectedTodo,
     clearError,
     resetStatus,
     selectTodoError,
     selectTodoStatus,
-    setSelectedTodo
+    setSelectedTodo,
+    setSearchTerm,
 } from '../TodoSlice';
 
 import LeftSideBar from './LeftSideBar';
@@ -26,10 +27,14 @@ const TodoMain = () => {
     const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
 
     const dispatch = useDispatch();
-    const todos = useSelector(selectTodos);
+    const filteredTodos = useSelector(selectFilteredTodos);
     const selectedTodo = useSelector(selectSelectedTodo);
     const status = useSelector(selectTodoStatus);
     const error = useSelector(selectTodoError);
+
+    const handleSearch = (event) => {
+        dispatch(setSearchTerm(event.target.value));
+    };
 
     useEffect(() => {
         dispatch(fetchTodos());
@@ -97,6 +102,7 @@ const TodoMain = () => {
                                         type="search"
                                         placeholder="Search Todo"
                                         aria-label="Search"
+                                        onChange={handleSearch}
                                     />
                                     <span className="input-group-text">
                                         <i className="bi bi-search"></i>
@@ -106,7 +112,7 @@ const TodoMain = () => {
                         </div>
 
                         <div className="row overflow-auto">
-                            {todos.map((task, index) => (
+                            {filteredTodos.map((task, index) => (
                                 <TaskCard
                                     key={task._id || index} 
                                     task={task}
