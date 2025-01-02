@@ -10,4 +10,7 @@ router.patch("/:id", todoController.updateTodo);
 router.delete("/:id", todoController.deleteTodo); 
 router.delete("/",todoController.deleteAllTodos);
 
+router.patch("/:id/favorite", todoController.toggleFavorited);
+router.patch("/:id/complete", todoController.toggleCompleted);
+
 module.exports = router;

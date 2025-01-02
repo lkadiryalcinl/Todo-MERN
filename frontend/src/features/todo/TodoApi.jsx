@@ -53,3 +53,21 @@ export const deletealltodos=async()=>{
         throw error.response.data
     }
 }
+
+export const toggleTodoCompleted = async (task) => {
+    try {
+        const res = await axiosi.patch(`/todo/${task._id}/complete`);
+        return res.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+export const toggleTodoFavorited = async (task) => {
+    try {
+        const res = await axiosi.patch(`/todo/${task._id}/favorite`);
+        return res.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};

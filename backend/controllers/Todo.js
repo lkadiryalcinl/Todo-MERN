@@ -76,7 +76,6 @@ exports.deleteTodo = async (req, res) => {
 exports.deleteAllTodos = async (req, res) => {
   try {
     const result = await Todo.deleteMany({});
-    console.log(result)
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: "No todos found to delete" });
     }
@@ -84,5 +83,39 @@ exports.deleteAllTodos = async (req, res) => {
     res.status(200).json({ message: "All todos deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete todos", details: error.message });
+  }
+};
+
+exports.toggleFavorited = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const todo = await Todo.findById(id);
+    todo.isFavorited = !todo.isFavorited;
+
+    const updatedTodo = await Todo.updateOne(todo);
+
+    if (!updatedTodo) return res.status(404).json({ message: "Todo not found" });
+
+    res.status(200).json({ message: "Favorited status toggled", todo: updatedTodo });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to toggle favorited status", details: error.message });
+  }
+};
+
+exports.toggleCompleted = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const todo = await Todo.findById(id);
+    todo.isCompleted = !todo.isCompleted;
+
+    const updatedTodo = await Todo.updateOne(todo);
+
+    if (!updatedTodo) return res.status(404).json({ message: "Todo not found" });
+
+    res.status(200).json({ message: "Completed status toggled", todo: updatedTodo });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to toggle completed status", details: error.message });
   }
 };

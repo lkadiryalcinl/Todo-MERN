@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getalltodos, gettodobyid, createtodo, updatetodo, deletetodo,deletealltodos } from './TodoApi';
+import { getalltodos, gettodobyid, createtodo, updatetodo, deletetodo,deletealltodos, toggleTodoCompleted, toggleTodoFavorited } from './TodoApi';
 
 const initialState = {
     todos: [],          
@@ -40,6 +40,18 @@ export const deleteAllTodos = createAsyncThunk('todo/deleteAllTodos', async () =
     const response = await deletealltodos();
     return response;
 });
+
+export const toggleCompleted = createAsyncThunk('todo/toggleCompleted', async (id) => {
+        const response = await toggleTodoCompleted(id);
+        return response;
+    }
+);
+
+export const toggleFavorited = createAsyncThunk('todo/toggleFavorited', async (id) => {
+        const response = await toggleTodoFavorited(id);
+        return response;
+    }
+);
 
 // Slice
 const todoSlice = createSlice({
@@ -165,6 +177,30 @@ const todoSlice = createSlice({
                 state.status = 'rejected'
                 state.error = action.error.message;
             })
+
+            .addCase(toggleCompleted.fulfilled, (state, action) => {
+                const updatedId = action.meta.arg._id;
+                const index = state.todos.findIndex((todo) => todo._id === updatedId);
+                
+                if (index !== -1) {
+                    state.todos[index] = {
+                        ...state.todos[index], 
+                        isCompleted: !state.todos[index].isCompleted,
+                    };
+                }
+            })
+    
+            .addCase(toggleFavorited.fulfilled, (state, action) => {
+                let newTodo = action.meta.arg;
+                const index = state.todos.findIndex((todo) => todo._id === newTodo._id);
+                
+                if (index !== -1) {
+                    state.todos[index] = {
+                        ...state.todos[index],
+                        isFavorited: !state.todos[index].isFavorited,
+                    };
+                }
+            });
     },
 });
 
